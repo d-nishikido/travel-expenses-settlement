@@ -1,8 +1,5 @@
--- Create database if not exists
-CREATE DATABASE IF NOT EXISTS travel_expenses;
-
--- Switch to the database
-\c travel_expenses;
+-- Database is already created by docker-compose environment variable
+-- We are already connected to the travel_expenses database
 
 -- Create enum types
 CREATE TYPE user_role AS ENUM ('employee', 'accounting');
