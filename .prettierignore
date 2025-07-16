@@ -1,0 +1,13 @@
+node_modules
+dist
+build
+.next
+.vscode
+.idea
+*.log
+*.tsbuildinfo
+.cache
+.parcel-cache
+.eslintcache
+public
+coverage
