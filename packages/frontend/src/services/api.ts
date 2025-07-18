@@ -5,6 +5,7 @@ const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
   private client: AxiosInstance;
+  private csrfToken: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -18,13 +19,24 @@ class ApiClient {
   }
 
   private setupInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor to add auth token and CSRF token
     this.client.interceptors.request.use(
-      (config) => {
+      async (config) => {
         const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Add CSRF token for non-GET requests
+        if (config.method && !['get', 'head', 'options'].includes(config.method.toLowerCase())) {
+          if (!this.csrfToken) {
+            await this.fetchCSRFToken();
+          }
+          if (this.csrfToken) {
+            config.headers['X-CSRF-Token'] = this.csrfToken;
+          }
+        }
+        
         return config;
       },
       (error) => Promise.reject(error)
@@ -38,6 +50,13 @@ class ApiClient {
           localStorage.removeItem('auth_token');
           window.location.href = '/login';
         }
+        
+        // If CSRF token is invalid, clear it and retry
+        if (error.response?.status === 403 && 
+            error.response?.data?.message?.includes('CSRF')) {
+          this.csrfToken = null;
+        }
+        
         return Promise.reject(this.handleError(error));
       }
     );
@@ -47,6 +66,15 @@ class ApiClient {
     const message = error.response?.data?.message || error.message || 'An error occurred';
     const status = error.response?.status || 500;
     return { message, status };
+  }
+
+  private async fetchCSRFToken(): Promise<void> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/csrf-token`);
+      this.csrfToken = response.data.csrfToken;
+    } catch (error) {
+      console.error('Failed to fetch CSRF token:', error);
+    }
   }
 
   // Auth endpoints

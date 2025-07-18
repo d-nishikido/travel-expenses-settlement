@@ -1,0 +1,97 @@
+import { TestExpenseReport } from '../utils/testHelpers';
+import { testUsers } from './users';
+
+export const testExpenseReports: Record<string, TestExpenseReport> = {
+  draft: {
+    id: 'test-report-draft-id',
+    user_id: testUsers.employee.id,
+    title: 'Business Trip to Tokyo',
+    trip_purpose: 'Client meeting and conference attendance',
+    trip_start_date: '2024-01-15',
+    trip_end_date: '2024-01-18',
+    status: 'draft',
+    total_amount: 150000,
+  },
+  submitted: {
+    id: 'test-report-submitted-id',
+    user_id: testUsers.employee.id,
+    title: 'Sales Conference in Osaka',
+    trip_purpose: 'Annual sales conference',
+    trip_start_date: '2024-01-10',
+    trip_end_date: '2024-01-12',
+    status: 'submitted',
+    total_amount: 85000,
+  },
+  approved: {
+    id: 'test-report-approved-id',
+    user_id: testUsers.anotherEmployee.id,
+    title: 'Training Workshop in Kyoto',
+    trip_purpose: 'Professional development training',
+    trip_start_date: '2024-01-08',
+    trip_end_date: '2024-01-10',
+    status: 'approved',
+    total_amount: 95000,
+  },
+  rejected: {
+    id: 'test-report-rejected-id',
+    user_id: testUsers.employee.id,
+    title: 'Research Visit to Nagoya',
+    trip_purpose: 'Market research',
+    trip_start_date: '2024-01-05',
+    trip_end_date: '2024-01-07',
+    status: 'rejected',
+    total_amount: 120000,
+  },
+  paid: {
+    id: 'test-report-paid-id',
+    user_id: testUsers.anotherEmployee.id,
+    title: 'Client Presentation in Fukuoka',
+    trip_purpose: 'Client presentation and negotiation',
+    trip_start_date: '2024-01-01',
+    trip_end_date: '2024-01-03',
+    status: 'paid',
+    total_amount: 110000,
+  },
+};
+
+export const invalidExpenseReports = {
+  missingTitle: {
+    id: 'test-id',
+    user_id: testUsers.employee.id,
+    trip_purpose: 'Test purpose',
+    trip_start_date: '2024-01-15',
+    trip_end_date: '2024-01-18',
+    status: 'draft',
+    total_amount: 100000,
+  },
+  invalidStatus: {
+    id: 'test-id',
+    user_id: testUsers.employee.id,
+    title: 'Test Trip',
+    trip_purpose: 'Test purpose',
+    trip_start_date: '2024-01-15',
+    trip_end_date: '2024-01-18',
+    status: 'invalid-status',
+    total_amount: 100000,
+  },
+  invalidDateRange: {
+    id: 'test-id',
+    user_id: testUsers.employee.id,
+    title: 'Test Trip',
+    trip_purpose: 'Test purpose',
+    trip_start_date: '2024-01-18',
+    trip_end_date: '2024-01-15', // End date before start date
+    status: 'draft',
+    total_amount: 100000,
+  },
+  negativeAmount: {
+    id: 'test-id',
+    user_id: testUsers.employee.id,
+    title: 'Test Trip',
+    trip_purpose: 'Test purpose',
+    trip_start_date: '2024-01-15',
+    trip_end_date: '2024-01-18',
+    status: 'draft',
+    total_amount: -100000,
+  },
+};
