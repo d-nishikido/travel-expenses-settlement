@@ -161,3 +161,7 @@ travel-expenses-settlement/
 ### 依存関係関連
 - インストールエラー: `pnpm install --force`
 - 型エラー: `pnpm run typecheck`で詳細確認
+
+### サンプルアカウント
+  - **Admin**: admin@example.com / password123
+  - **Employee**: employee1@example.com / password123

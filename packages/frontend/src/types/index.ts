@@ -54,3 +54,27 @@ export interface ApiResponse<T> {
   message?: string;
   error?: string;
 }
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface ApprovalHistory {
+  id: string;
+  expense_report_id: string;
+  action: 'submitted' | 'approved' | 'rejected' | 'paid';
+  user_id: string;
+  comment?: string;
+  created_at: string;
+}
+
+export interface ApiError {
+  message: string;
+  status: number;
+}

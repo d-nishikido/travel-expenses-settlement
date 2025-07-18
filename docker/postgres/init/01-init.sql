@@ -88,6 +88,7 @@ CREATE TRIGGER update_expense_items_updated_at BEFORE UPDATE ON expense_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert initial test data
+-- Both users have password: "password"
 INSERT INTO users (email, password, name, role, department) VALUES
-    ('admin@example.com', '$2b$10$YourHashedPasswordHere', '経理部管理者', 'accounting', '経理部'),
-    ('employee1@example.com', '$2b$10$YourHashedPasswordHere', '社員太郎', 'employee', '営業部');
+    ('admin@example.com', '$2b$10$iOZUWKdy9eR7SVLW7V7rbO8WQPvrtfT9axHz8qmtHK6rRUSZf1Ony', '経理部管理者', 'accounting', '経理部'),
+    ('employee1@example.com', '$2b$10$iOZUWKdy9eR7SVLW7V7rbO8WQPvrtfT9axHz8qmtHK6rRUSZf1Ony', '社員太郎', 'employee', '営業部');
