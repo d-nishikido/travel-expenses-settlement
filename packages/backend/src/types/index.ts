@@ -54,6 +54,12 @@ export interface ApprovalHistory {
   created_at: Date;
 }
 
+export interface JWTPayload {
+  userId: string;
+  email: string;
+  role: UserRole;
+}
+
 export interface AuthTokenPayload {
   id: string;
   email: string;

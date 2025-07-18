@@ -3,6 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/env';
 import { connectDatabase } from './config/database';
+import logger from './utils/logger';
+import { ResponseUtil } from './utils/response';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import routes from './routes';
 
 const app = express();
 
@@ -15,36 +19,43 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Request logging middleware
+app.use((req, _res, next) => {
+  logger.info(`${req.method} ${req.path}`, {
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+  next();
+});
+
 // Basic route
 app.get('/api/health', (_req, res) => {
-  res.json({ 
-    status: 'OK', 
+  return ResponseUtil.success(res, {
+    status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: config.nodeEnv 
+    environment: config.node_env,
   });
 });
 
+// API routes
+app.use('/api', routes);
+
 // Error handling middleware
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
+app.use(errorHandler);
 
 // 404 handler
-app.use('*', (_req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+app.use('*', notFoundHandler);
 
 const startServer = async () => {
   try {
     await connectDatabase();
     
     app.listen(config.port, () => {
-      console.log(`🚀 Backend server running on port ${config.port}`);
-      console.log(`📍 Health check: http://localhost:${config.port}/api/health`);
+      logger.info(`🚀 Backend server running on port ${config.port}`);
+      logger.info(`📍 Health check: http://localhost:${config.port}/api/health`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };

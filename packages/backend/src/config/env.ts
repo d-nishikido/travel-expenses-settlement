@@ -4,7 +4,7 @@ dotenv.config();
 
 export const config = {
   port: parseInt(process.env.BACKEND_PORT || '5000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  node_env: process.env.NODE_ENV || 'development',
   database: {
     url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/travel_expenses',
   },
