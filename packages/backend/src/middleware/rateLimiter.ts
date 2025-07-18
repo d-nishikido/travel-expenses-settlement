@@ -11,7 +11,7 @@ export const generalLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  handler: (req: Request, res: Response) => {
+  handler: (_req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many requests from this IP, please try again later.',
       retryAfter: 15 * 60 * 1000
@@ -30,7 +30,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true, // Don't count successful requests
-  handler: (req: Request, res: Response) => {
+  handler: (_req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many authentication attempts, please try again later.',
       retryAfter: 15 * 60 * 1000
@@ -48,7 +48,7 @@ export const expenseReportLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  handler: (req: Request, res: Response) => {
+  handler: (_req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many expense report requests, please slow down.',
       retryAfter: 10 * 60 * 1000
@@ -66,7 +66,7 @@ export const adminLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  handler: (req: Request, res: Response) => {
+  handler: (_req: Request, res: Response) => {
     res.status(429).json({
       error: 'Too many administrative requests, please try again later.',
       retryAfter: 60 * 60 * 1000

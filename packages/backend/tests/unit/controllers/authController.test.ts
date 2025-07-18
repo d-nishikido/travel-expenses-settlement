@@ -93,7 +93,7 @@ describe('AuthController', () => {
     it('should return current user when authenticated', async () => {
       // Arrange
       const mockUser = testUsers.employee;
-      mockRequest.user = { userId: mockUser.id };
+      mockRequest.user = { userId: mockUser.id, email: mockUser.email, role: mockUser.role };
       
       mockAuthService.getUserById.mockResolvedValue(mockUser);
 
@@ -121,7 +121,7 @@ describe('AuthController', () => {
     it('should call next with error when AuthService.getUserById throws', async () => {
       // Arrange
       const mockUser = testUsers.employee;
-      mockRequest.user = { userId: mockUser.id };
+      mockRequest.user = { userId: mockUser.id, email: mockUser.email, role: mockUser.role };
       
       const mockError = new Error('Database error');
       mockAuthService.getUserById.mockRejectedValue(mockError);

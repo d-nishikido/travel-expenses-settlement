@@ -10,7 +10,7 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 # Copy workspace configuration
-COPY package.json pnpm-workspace.yaml ./
+COPY package.json pnpm-workspace.yaml tsconfig.base.json ./
 COPY packages/backend/package.json ./packages/backend/
 COPY packages/frontend/package.json ./packages/frontend/
 
@@ -18,7 +18,8 @@ COPY packages/frontend/package.json ./packages/frontend/
 RUN pnpm install
 
 # Copy application source
-COPY . .
+COPY packages/ ./packages/
+COPY docker/ ./docker/
 
 # Expose ports
 EXPOSE 3000 5000
