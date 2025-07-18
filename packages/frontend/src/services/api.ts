@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { LoginRequest, LoginResponse, ApiError } from '@/types';
 
-const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -51,8 +51,8 @@ class ApiClient {
 
   // Auth endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await this.client.post<LoginResponse>('/auth/login', credentials);
-    return response.data;
+    const response = await this.client.post<{success: boolean; data: LoginResponse}>('/auth/login', credentials);
+    return response.data.data;
   }
 
   async logout(): Promise<void> {
@@ -60,8 +60,8 @@ class ApiClient {
   }
 
   async getCurrentUser() {
-    const response = await this.client.get('/auth/me');
-    return response.data;
+    const response = await this.client.get<{success: boolean; data: any}>('/auth/me');
+    return response.data.data;
   }
 
   // Expense Reports endpoints

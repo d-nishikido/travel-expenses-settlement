@@ -58,6 +58,7 @@ export const LoginPage: React.FC = () => {
                     message: '有効なメールアドレスを入力してください'
                   }
                 })}
+                id="email"
                 type="email"
                 autoComplete="email"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -80,6 +81,7 @@ export const LoginPage: React.FC = () => {
                     message: 'パスワードは6文字以上で入力してください'
                   }
                 })}
+                id="password"
                 type="password"
                 autoComplete="current-password"
                 className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -117,10 +119,10 @@ export const LoginPage: React.FC = () => {
             デモアカウント:
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            社員: employee@example.com / password123
+            社員: employee1@example.com / password
           </p>
           <p className="text-xs text-gray-500">
-            経理: accounting@example.com / password123
+            経理: admin@example.com / password
           </p>
         </div>
       </div>

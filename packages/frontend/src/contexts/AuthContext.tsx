@@ -44,11 +44,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('auth_token', response.token);
       setUser(response.user);
+      
+      // ログイン成功後のナビゲーションは呼び出し元で処理する
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       const apiError = error as ApiError;
       throw new Error(apiError.message || 'Login failed');
-    } finally {
-      setIsLoading(false);
     }
   };
 
