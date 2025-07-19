@@ -4,7 +4,7 @@ import { AuthController } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
 
 // Login validation
 const loginValidation = [
