@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@automatalabs/mcp-server-playwright"],
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "./packages/e2e/browsers"
+      }
+    }
+  }
+}

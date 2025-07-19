@@ -6,7 +6,7 @@ import expenseItemRoutes from './expenseItems';
 import reportRoutes from './reports';
 import { authLimiter, expenseReportLimiter, adminLimiter } from '../middleware/rateLimiter';
 
-const router = Router();
+const router: Router = Router();
 
 // Mount routes with specific rate limiting
 router.use('/auth', authLimiter, authRoutes);
