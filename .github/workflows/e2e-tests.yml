@@ -1,0 +1,128 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: travel_expenses_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 8
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Setup test database
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travel_expenses_test
+      run: |
+        cd packages/backend
+        pnpm run migrate
+        pnpm run seed:test
+
+    - name: Build application
+      run: |
+        cd packages/backend && pnpm run build
+        cd packages/frontend && pnpm run build
+
+    - name: Start application servers
+      run: |
+        cd packages/backend && pnpm start &
+        cd packages/frontend && pnpm start &
+        
+        # Wait for servers to be ready
+        timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
+        timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+      env:
+        NODE_ENV: test
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travel_expenses_test
+        JWT_SECRET: test-secret-key
+        PORT: 4000
+
+    - name: Install Playwright Browsers
+      run: cd packages/e2e && npx playwright install --with-deps
+
+    - name: Run Playwright tests
+      run: cd packages/e2e && pnpm test
+      env:
+        BASE_URL: http://localhost:3000
+        API_URL: http://localhost:4000
+
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: packages/e2e/playwright-report/
+        retention-days: 30
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: packages/e2e/test-results/
+        retention-days: 30
+
+    - name: Comment Test Results on PR
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request' && always()
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const resultsPath = 'packages/e2e/test-results/junit.xml';
+            if (fs.existsSync(resultsPath)) {
+              const results = fs.readFileSync(resultsPath, 'utf8');
+              // Parse results and create comment
+              const comment = `## E2E Test Results
+              
+              📊 Test results have been uploaded as artifacts.
+              
+              🎭 [View Playwright Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              
+              ${results.includes('failures="0"') ? '✅ All tests passed!' : '❌ Some tests failed. Check the artifacts for details.'}`;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('Error posting test results:', error);
+          }
