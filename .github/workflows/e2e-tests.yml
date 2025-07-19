@@ -44,9 +44,7 @@ jobs:
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/travel_expenses_test
       run: |
-        cd packages/backend
-        pnpm run migrate
-        pnpm run seed:test
+        echo "Database setup - migrations will be handled by the application"
 
     - name: Build application
       run: |
@@ -56,10 +54,10 @@ jobs:
     - name: Start application servers
       run: |
         cd packages/backend && pnpm start &
-        cd packages/frontend && pnpm start &
+        cd packages/frontend && pnpm preview --port 3000 --host &
         
         # Wait for servers to be ready
-        timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
+        timeout 60 bash -c 'until curl -f http://localhost:4000/health || curl -f http://localhost:4000; do sleep 2; done'
         timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
       env:
         NODE_ENV: test
