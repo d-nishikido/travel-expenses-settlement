@@ -48,8 +48,9 @@ jobs:
 
     - name: Build application
       run: |
+        ls -la packages/
         cd packages/backend && pnpm run build
-        cd packages/frontend && pnpm run build
+        cd ../frontend && pnpm run build
 
     - name: Start application servers
       run: |
