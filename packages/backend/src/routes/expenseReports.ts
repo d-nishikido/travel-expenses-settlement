@@ -4,7 +4,7 @@ import { ExpenseReportController } from '../controllers/expenseReportController'
 import { authenticate, authorize } from '../middleware/auth';
 import { validate } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
 
 // Validation rules
 const idValidation = [

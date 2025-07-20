@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  postgres-test:
+    image: postgres:14-alpine
+    container_name: travel-expenses-test-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: travel_expenses_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend-test:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: travel-expenses-test-backend
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@postgres-test:5432/travel_expenses_test
+      JWT_SECRET: test-secret-key
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./packages:/app/packages
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        cd packages/backend &&
+        pnpm run migrate &&
+        pnpm run seed:test &&
+        pnpm start
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend-test:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: travel-expenses-test-frontend
+    depends_on:
+      - backend-test
+    environment:
+      NODE_ENV: test
+      REACT_APP_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./packages:/app/packages
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        cd packages/frontend &&
+        pnpm start
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: travel-expenses-e2e
+    depends_on:
+      backend-test:
+        condition: service_healthy
+      frontend-test:
+        condition: service_healthy
+    environment:
+      BASE_URL: http://frontend-test:3000
+      API_URL: http://backend-test:4000
+      HEADLESS: "true"
+    volumes:
+      - ./packages:/app/packages
+      - ./e2e-results:/app/packages/e2e/test-results
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        cd packages/e2e &&
+        npx playwright install --with-deps &&
+        pnpm test
+      "
+    profiles:
+      - e2e
+
+networks:
+  test-network:
+    driver: bridge

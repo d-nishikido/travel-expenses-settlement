@@ -4,7 +4,7 @@ import { ExpenseItemController } from '../controllers/expenseItemController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validation';
 
-const router = Router();
+const router: Router = Router();
 
 // Validation rules
 const reportIdValidation = [
