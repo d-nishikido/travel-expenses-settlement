@@ -14,7 +14,10 @@
     "lint": "pnpm run --recursive lint",
     "typecheck": "pnpm run --recursive typecheck",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "validate:env": "node scripts/validate-env.js",
+    "build:docker": "docker-compose -f docker/docker-compose.prod.yml build",
+    "deploy": "node scripts/deploy.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
