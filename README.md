@@ -64,6 +64,12 @@ pnpm run typecheck
 
 # フォーマット
 pnpm run format
+
+# 環境変数の検証
+pnpm run validate:env
+
+# 本番用Dockerイメージのビルド
+pnpm run build:docker
 ```
 
 ## プロジェクト構成
@@ -96,6 +102,13 @@ travel-expenses-settlement/
 │       │   ├── types/
 │       │   └── styles/
 │       └── package.json
+├── .github/
+│   └── workflows/              # CI/CDパイプライン
+├── docs/                       # ドキュメント
+│   ├── API.md                  # API仕様書
+│   ├── DEPLOYMENT.md           # デプロイガイド
+│   └── CONTRIBUTING.md         # コントリビューションガイド
+├── scripts/                    # ビルド・デプロイスクリプト
 ├── docker-compose.yml
 ├── package.json
 └── pnpm-workspace.yaml
@@ -152,6 +165,15 @@ travel-expenses-settlement/
 - [ ] 承認履歴
 - [ ] 通知機能
 
+### フェーズ5: デプロイメント準備 ✅
+- [x] 環境変数管理システム
+- [x] 本番用Dockerイメージ（マルチステージビルド）
+- [x] CI/CDパイプライン（GitHub Actions）
+- [x] ビルド最適化設定
+- [x] API仕様書
+- [x] デプロイメントガイド
+- [x] コントリビューションガイド
+
 ## トラブルシューティング
 
 ### Docker関連
@@ -165,3 +187,41 @@ travel-expenses-settlement/
 ### サンプルアカウント
   - **Admin**: admin@example.com / password123
   - **Employee**: employee1@example.com / password123
+
+## ドキュメント
+
+- **[API仕様書](docs/API.md)** - REST APIの詳細仕様
+- **[デプロイメントガイド](docs/DEPLOYMENT.md)** - 本番環境への配置手順
+- **[コントリビューションガイド](docs/CONTRIBUTING.md)** - 開発参加ガイドライン
+
+## 本番環境への展開
+
+### 環境変数の設定
+```bash
+# 環境固有の設定ファイルをコピー
+cp .env.example .env.production
+
+# 本番環境用の値を設定
+# - データベース接続情報
+# - JWT シークレット（32文字以上）
+# - API URL
+```
+
+### ビルドとデプロイ
+```bash
+# 環境変数の検証
+pnpm run validate:env
+
+# 本番用ビルドの実行
+./scripts/build.sh --docker
+
+# 本番環境へのデプロイ（詳細はデプロイガイドを参照）
+docker-compose -f docker/docker-compose.prod.yml up -d
+```
+
+### CI/CD パイプライン
+GitHub Actionsを使用した自動化：
+- **コード品質チェック**: lint、型チェック、テスト
+- **セキュリティスキャン**: 脆弱性検出
+- **Dockerイメージビルド**: 本番用イメージの作成
+- **自動デプロイ**: 承認後の自動配置

@@ -184,7 +184,7 @@
 ## コマンド一覧
 ```bash
 # 開発環境の起動
-docker-compose up -d
+docker compose up -d
 
 # データベースマイグレーション
 npm run migrate
