@@ -7,7 +7,7 @@
     "sourceMap": true,
     "declaration": false,
     "removeComments": true,
-    "importHelpers": true,
+    "importHelpers": false,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
@@ -16,6 +16,6 @@
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"],
   "ts-node": {
-    "swc": true
+    "transpileOnly": true
   }
 }
