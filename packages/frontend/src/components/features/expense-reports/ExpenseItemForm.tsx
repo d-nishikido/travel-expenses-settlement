@@ -70,7 +70,7 @@ export const ExpenseItemForm: React.FC<ExpenseItemFormProps> = ({
         {initialData ? '精算項目を編集' : '新しい精算項目'}
       </h3>
       
-      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect
             label="カテゴリー"
@@ -124,13 +124,15 @@ export const ExpenseItemForm: React.FC<ExpenseItemFormProps> = ({
             キャンセル
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={handleSubmit(onSubmitForm)}
             disabled={disabled}
+            data-testid="save-item-button"
           >
             {initialData ? '更新' : '追加'}
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
