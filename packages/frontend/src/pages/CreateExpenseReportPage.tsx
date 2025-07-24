@@ -64,8 +64,20 @@ export const CreateExpenseReportPage: React.FC = () => {
       navigate('/expense-reports');
     } catch (error) {
       console.error('Failed to create expense report:', error);
-      // TODO: Show error notification
+      throw error; // Re-throw to let form handle the error
     }
+  };
+  
+  const handleSaveDraft = async (
+    data: ExpenseReportFormData,
+    items: ExpenseItem[]
+  ) => {
+    // Only save draft if there's meaningful content
+    if (!data.title && !data.trip_purpose && items.length === 0) {
+      return; // Nothing to save
+    }
+    
+    await handleSubmit(data, items, 'save');
   };
 
   const handleCancel = () => {
@@ -79,6 +91,7 @@ export const CreateExpenseReportPage: React.FC = () => {
           <ExpenseReportForm
             onSubmit={handleSubmit}
             onCancel={handleCancel}
+            onSaveDraft={handleSaveDraft}
             isLoading={createReportMutation.isLoading || createItemMutation.isLoading}
           />
         </div>

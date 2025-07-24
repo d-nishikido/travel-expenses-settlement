@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -6,8 +6,13 @@ import { ExpenseReport, ExpenseItem } from '@/types';
 import { FormInput } from '@/components/common/FormInput';
 import { FormTextarea } from '@/components/common/FormTextarea';
 import { Button } from '@/components/common/Button';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ToastContainer } from '@/components/common/ToastContainer';
 import { ExpenseItemList } from './ExpenseItemList';
 import { formatDateForInput, formatCurrency } from '@/utils/formatters';
+import { useToast } from '@/hooks/useToast';
+import { useFormStorage } from '@/hooks/useFormStorage';
+import { useAutoSave } from '@/hooks/useAutoSave';
 
 const schema = yup.object({
   title: yup.string().required('タイトルは必須です').max(200, 'タイトルは200文字以内で入力してください'),
@@ -32,6 +37,7 @@ interface ExpenseReportFormProps {
   onCancel: () => void;
   isEdit?: boolean;
   isLoading?: boolean;
+  onSaveDraft?: (data: ExpenseReportFormData, items: ExpenseItem[]) => Promise<void>;
 }
 
 export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
@@ -41,16 +47,17 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
   onCancel,
   isEdit = false,
   isLoading = false,
+  onSaveDraft,
 }) => {
   const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>(initialItems);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const { toasts, success, error, hideToast } = useToast();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<ExpenseReportFormData>({
+  const form = useForm<ExpenseReportFormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       title: initialData?.title || '',
@@ -59,12 +66,27 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
       trip_end_date: initialData?.trip_end_date ? new Date(initialData.trip_end_date) : undefined,
     },
   });
+  
+  const { register, handleSubmit, formState: { errors, isDirty }, watch } = form;
+  
+  // Form storage for backup
+  const storageKey = `expense-report-form-${initialData?.id || 'new'}`;
+  const { clearStorage } = useFormStorage({
+    form,
+    storageKey,
+    excludeFields: ['trip_start_date', 'trip_end_date'] as (keyof ExpenseReportFormData)[],
+  });
 
   // Calculate total amount when items change
   useEffect(() => {
     const total = expenseItems.reduce((sum, item) => sum + (item.amount || 0), 0);
     setTotalAmount(total);
   }, [expenseItems]);
+  
+  // Track form dirty state
+  useEffect(() => {
+    setIsFormDirty(isDirty || expenseItems.length > initialItems.length);
+  }, [isDirty, expenseItems.length, initialItems.length]);
 
   const handleAddItem = (item: Omit<ExpenseItem, 'id' | 'expense_report_id' | 'created_at' | 'updated_at'>) => {
     const newItem: ExpenseItem = {
@@ -75,6 +97,7 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
       updated_at: new Date().toISOString(),
     };
     setExpenseItems(prev => [...prev, newItem]);
+    setIsFormDirty(true);
   };
 
   const handleUpdateItem = (id: string, updatedItem: Partial<ExpenseItem>) => {
@@ -85,18 +108,67 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
           : item
       )
     );
+    setIsFormDirty(true);
   };
 
   const handleDeleteItem = (id: string) => {
     setExpenseItems(prev => prev.filter(item => item.id !== id));
+    setIsFormDirty(true);
   };
 
-  const onSave = (data: ExpenseReportFormData) => {
-    onSubmit(data, expenseItems, 'save');
+  // Auto-save functionality
+  const handleAutoSave = useCallback(async (data: ExpenseReportFormData) => {
+    if (onSaveDraft && !isEdit && (isDirty || expenseItems.length > 0)) {
+      try {
+        await onSaveDraft(data, expenseItems);
+      } catch (error) {
+        console.warn('Auto-save failed:', error);
+      }
+    }
+  }, [onSaveDraft, isEdit, isDirty, expenseItems]);
+  
+  useAutoSave({
+    form,
+    onSave: handleAutoSave,
+    enabled: !isEdit && !!onSaveDraft,
+    delay: 30000, // 30 seconds
+  });
+  
+  const onSave = async (data: ExpenseReportFormData) => {
+    setIsSaving(true);
+    try {
+      await onSubmit(data, expenseItems, 'save');
+      success('下書きを保存しました');
+      clearStorage(); // Clear backup after successful save
+    } catch (error) {
+      error('保存に失敗しました');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const onSubmitForApproval = (data: ExpenseReportFormData) => {
-    onSubmit(data, expenseItems, 'submit');
+  const onSubmitForApproval = async (data: ExpenseReportFormData) => {
+    try {
+      await onSubmit(data, expenseItems, 'submit');
+      success('申請を提出しました');
+      clearStorage(); // Clear backup after successful submit
+    } catch (error) {
+      error('提出に失敗しました');
+    }
+  };
+  
+  const handleCancel = () => {
+    if (isFormDirty) {
+      setShowCancelDialog(true);
+    } else {
+      clearStorage();
+      onCancel();
+    }
+  };
+  
+  const confirmCancel = () => {
+    clearStorage();
+    onCancel();
   };
 
   const canSubmit = expenseItems.length > 0 && totalAmount > 0;
@@ -107,6 +179,7 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
       <div className="px-6 py-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-gray-900">
           {isEdit ? '精算申請編集' : '新規精算申請'}
+        {isFormDirty && <span className="ml-2 text-sm text-yellow-600">*未保存の変更があります</span>}
         </h1>
         {initialData?.status === 'rejected' && (
           <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -189,7 +262,7 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
           <Button
             type="button"
             variant="outline"
-            onClick={onCancel}
+            onClick={handleCancel}
             disabled={isLoading}
             className="sm:order-1"
           >
@@ -202,10 +275,10 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
                 type="button"
                 variant="outline"
                 onClick={handleSubmit(onSave)}
-                disabled={isLoading}
+                disabled={isLoading || isSaving}
                 className="sm:order-2"
               >
-                下書き保存
+                {isSaving ? '保存中...' : '下書き保存'}
               </Button>
               
               <Button
@@ -227,7 +300,30 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
             </p>
           </div>
         )}
+        
+        {!isEdit && onSaveDraft && (
+          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-xs text-blue-700">
+              💡 フォームの内容は30秒ごとに自動保存されます
+            </p>
+          </div>
+        )}
       </form>
+      
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={confirmCancel}
+        title="変更を破棄しますか？"
+        message="未保存の変更があります。キャンセルすると変更内容が失われます。"
+        confirmText="破棄する"
+        cancelText="戻る"
+        confirmVariant="danger"
+      />
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={hideToast} />
     </div>
   );
 };
