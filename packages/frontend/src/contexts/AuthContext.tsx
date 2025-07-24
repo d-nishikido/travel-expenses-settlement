@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthContextType, ApiError } from '@/types';
-import { apiClient } from '@/services/api';
+import { api } from '@/services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem('auth_token');
       if (token) {
         try {
-          const userData = await apiClient.getCurrentUser();
+          const userData = await api.auth.getCurrentUser();
           setUser(userData);
         } catch (error) {
           localStorage.removeItem('auth_token');
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<void> => {
     try {
       setIsLoading(true);
-      const response = await apiClient.login({ email, password });
+      const response = await api.auth.login({ email, password });
       
       localStorage.setItem('auth_token', response.token);
       setUser(response.user);
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      await apiClient.logout();
+      await api.auth.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

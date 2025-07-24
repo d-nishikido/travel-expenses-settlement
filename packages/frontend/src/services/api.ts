@@ -189,4 +189,44 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient();
+const apiClient = new ApiClient();
+
+export const api = {
+  auth: {
+    login: (credentials: LoginRequest) => apiClient.login(credentials),
+    logout: () => apiClient.logout(),
+    getCurrentUser: () => apiClient.getCurrentUser(),
+  },
+  expenseReports: {
+    getAll: (params?: { status?: string; page?: number; limit?: number }) => 
+      apiClient.getExpenseReports(params),
+    getById: (id: string) => apiClient.getExpenseReport(id),
+    create: (data: any) => apiClient.createExpenseReport(data),
+    update: ({ id, data }: { id: string; data: any }) => 
+      apiClient.updateExpenseReport(id, data),
+    delete: (id: string) => apiClient.deleteExpenseReport(id),
+    submit: (id: string) => apiClient.submitExpenseReport(id),
+    approve: (id: string, comment?: string) => 
+      apiClient.approveExpenseReport(id, comment),
+    reject: (id: string, comment?: string) => 
+      apiClient.rejectExpenseReport(id, comment),
+  },
+  expenseItems: {
+    getByReportId: (reportId: string) => apiClient.getExpenseItems(reportId),
+    create: (data: any) => apiClient.createExpenseItem(data.expense_report_id, data),
+    update: ({ reportId, id, data }: { reportId: string; id: string; data: any }) => 
+      apiClient.updateExpenseItem(reportId, id, data),
+    delete: ({ reportId, id }: { reportId: string; id: string }) => 
+      apiClient.deleteExpenseItem(reportId, id),
+  },
+  users: {
+    getAll: () => apiClient.getUsers(),
+    create: (data: any) => apiClient.createUser(data),
+    update: ({ id, data }: { id: string; data: any }) => apiClient.updateUser(id, data),
+    delete: (id: string) => apiClient.deleteUser(id),
+  },
+  reports: {
+    getSummary: () => apiClient.getSummaryReport(),
+    export: (format: 'csv' | 'pdf') => apiClient.exportReport(format),
+  },
+};

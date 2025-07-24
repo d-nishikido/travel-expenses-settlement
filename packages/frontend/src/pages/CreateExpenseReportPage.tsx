@@ -23,7 +23,9 @@ export const CreateExpenseReportPage: React.FC = () => {
     },
   });
 
-  const createItemMutation = useMutation(api.expenseItems.create);
+  const createItemMutation = useMutation(
+    (data: any) => api.expenseItems.create(data)
+  );
 
   const handleSubmit = async (
     data: ExpenseReportFormData,
