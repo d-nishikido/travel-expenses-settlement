@@ -5,7 +5,7 @@ import path from 'path';
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '.env.test') });
 
-const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+const baseURL = process.env.BASE_URL || 'http://localhost:3002';
 
 export default defineConfig({
   testDir: './tests',

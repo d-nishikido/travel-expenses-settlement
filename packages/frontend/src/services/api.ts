@@ -133,6 +133,16 @@ class ApiClient {
     return response.data;
   }
 
+  async getApprovalHistory(id: string) {
+    const response = await this.client.get(`/expense-reports/${id}/history`);
+    return response.data;
+  }
+
+  async markAsPaid(id: string, comment?: string) {
+    const response = await this.client.post(`/expense-reports/${id}/pay`, { comment });
+    return response.data;
+  }
+
   // Expense Items endpoints
   async getExpenseItems(reportId: string) {
     const response = await this.client.get(`/expense-reports/${reportId}/items`);
@@ -210,6 +220,9 @@ export const api = {
       apiClient.approveExpenseReport(id, comment),
     reject: (id: string, comment?: string) => 
       apiClient.rejectExpenseReport(id, comment),
+    getHistory: (id: string) => apiClient.getApprovalHistory(id),
+    markAsPaid: (id: string, comment?: string) => 
+      apiClient.markAsPaid(id, comment),
   },
   expenseItems: {
     getByReportId: (reportId: string) => apiClient.getExpenseItems(reportId),
