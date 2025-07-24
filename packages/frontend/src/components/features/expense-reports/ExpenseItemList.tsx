@@ -53,6 +53,7 @@ export const ExpenseItemList: React.FC<ExpenseItemListProps> = ({
               variant="outline"
               onClick={() => setShowAddForm(true)}
               className="inline-flex items-center"
+              data-testid="add-item-button"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               精算項目を追加
@@ -96,6 +97,7 @@ export const ExpenseItemList: React.FC<ExpenseItemListProps> = ({
             variant="outline"
             onClick={() => setShowAddForm(true)}
             className="inline-flex items-center"
+            data-testid="add-item-button"
           >
             <PlusIcon className="h-4 w-4 mr-2" />
             精算項目を追加

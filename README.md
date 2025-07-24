@@ -177,7 +177,7 @@ travel-expenses-settlement/
 ## トラブルシューティング
 
 ### Docker関連
-- コンテナが起動しない場合: `docker-compose down -v && docker-compose up -d`
+- コンテナが起動しない場合: `docker compose down -v && docker compose up -d`
 - データベース接続エラー: `.env`ファイルの設定を確認
 
 ### 依存関係関連

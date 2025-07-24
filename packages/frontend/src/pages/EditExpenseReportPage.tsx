@@ -45,7 +45,9 @@ export const EditExpenseReportPage: React.FC = () => {
     },
   });
 
-  const createItemMutation = useMutation(api.expenseItems.create);
+  const createItemMutation = useMutation(
+    (data: any) => api.expenseItems.create(data)
+  );
   const updateItemMutation = useMutation(api.expenseItems.update);
   const deleteItemMutation = useMutation(api.expenseItems.delete);
 

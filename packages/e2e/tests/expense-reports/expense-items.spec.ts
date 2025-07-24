@@ -30,7 +30,8 @@ test.describe('Expense Items Management', () => {
 
     // Verify amount is displayed correctly
     const amountCell = itemRow.locator('[data-testid="item-amount"]');
-    await expect(amountCell).toHaveText(`$${item.amount}`);
+    const expectedAmount = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(parseFloat(item.amount));
+    await expect(amountCell).toHaveText(expectedAmount);
   });
 
   test('should add multiple expense items', async ({ page, expenseReportPage }) => {
@@ -48,22 +49,23 @@ test.describe('Expense Items Management', () => {
     // Verify total amount calculation
     const totalAmount = page.locator('[data-testid="total-amount"]');
     const expectedTotal = testExpenseReport.items.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-    await expect(totalAmount).toHaveText(`$${expectedTotal.toFixed(2)}`);
+    const expectedTotalFormatted = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(expectedTotal);
+    await expect(totalAmount).toHaveText(expectedTotalFormatted);
   });
 
-  test('should validate expense item fields', async ({ expenseReportPage }) => {
+  test('should validate expense item fields', async ({ page, expenseReportPage }) => {
     // Try to add item without required fields
     await expenseReportPage.addItemButton().click();
     await expenseReportPage.itemSaveButton().click();
 
     // Check for validation errors
-    const categoryError = page.locator('text=Category is required');
+    const categoryError = page.locator('text=カテゴリーを選択してください');
     await expect(categoryError).toBeVisible();
 
-    const descriptionError = page.locator('text=Description is required');
+    const descriptionError = page.locator('text=項目説明は必須です');
     await expect(descriptionError).toBeVisible();
 
-    const amountError = page.locator('text=Amount is required');
+    const amountError = page.locator('text=金額は必須です');
     await expect(amountError).toBeVisible();
   });
 

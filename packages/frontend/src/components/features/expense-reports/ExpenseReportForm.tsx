@@ -172,7 +172,7 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
             <h2 className="text-lg font-semibold text-gray-900">精算項目</h2>
             <div className="text-right">
               <p className="text-sm text-gray-600">合計金額</p>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(totalAmount)}</p>
+              <p className="text-xl font-bold text-blue-600" data-testid="total-amount">{formatCurrency(totalAmount)}</p>
             </div>
           </div>
           <ExpenseItemList
