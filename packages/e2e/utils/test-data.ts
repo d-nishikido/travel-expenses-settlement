@@ -1,14 +1,14 @@
 export const testUsers = {
   employee: {
-    email: process.env.TEST_EMPLOYEE_EMAIL || 'test.employee@example.com',
-    password: process.env.TEST_EMPLOYEE_PASSWORD || 'TestEmployee123!',
-    name: 'Test Employee',
+    email: process.env.TEST_EMPLOYEE_EMAIL || 'employee1@example.com',
+    password: process.env.TEST_EMPLOYEE_PASSWORD || 'password',
+    name: '社員太郎',
     role: 'employee'
   },
   accounting: {
-    email: process.env.TEST_ACCOUNTING_EMAIL || 'test.accounting@example.com',
-    password: process.env.TEST_ACCOUNTING_PASSWORD || 'TestAccounting123!',
-    name: 'Test Accounting',
+    email: process.env.TEST_ACCOUNTING_EMAIL || 'admin@example.com',
+    password: process.env.TEST_ACCOUNTING_PASSWORD || 'password',
+    name: '経理部管理者',
     role: 'accounting'
   }
 };
