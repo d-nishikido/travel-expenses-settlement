@@ -5,6 +5,8 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { LoginPage } from '@/pages/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { UnauthorizedPage } from '@/pages/UnauthorizedPage';
+import { CreateExpenseReportPage } from '@/pages/CreateExpenseReportPage';
+import { EditExpenseReportPage } from '@/pages/EditExpenseReportPage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient({
@@ -37,6 +39,16 @@ function App() {
             <Route path="/expense-reports" element={
               <ProtectedRoute requiredRole="employee">
                 <div>Expense Reports List (Coming Soon)</div>
+              </ProtectedRoute>
+            } />
+            <Route path="/expense-reports/new" element={
+              <ProtectedRoute requiredRole="employee">
+                <CreateExpenseReportPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/expense-reports/:id/edit" element={
+              <ProtectedRoute requiredRole="employee">
+                <EditExpenseReportPage />
               </ProtectedRoute>
             } />
             
