@@ -7,6 +7,8 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { UnauthorizedPage } from '@/pages/UnauthorizedPage';
 import { CreateExpenseReportPage } from '@/pages/CreateExpenseReportPage';
 import { EditExpenseReportPage } from '@/pages/EditExpenseReportPage';
+import { ExpenseReportListPage } from '@/pages/ExpenseReportListPage';
+import { ExpenseReportDetailPage } from '@/pages/ExpenseReportDetailPage';
 import './styles/globals.css';
 
 const queryClient = new QueryClient({
@@ -37,13 +39,18 @@ function App() {
             
             {/* Employee Routes */}
             <Route path="/expense-reports" element={
-              <ProtectedRoute requiredRole="employee">
-                <div>Expense Reports List (Coming Soon)</div>
+              <ProtectedRoute>
+                <ExpenseReportListPage />
               </ProtectedRoute>
             } />
             <Route path="/expense-reports/new" element={
               <ProtectedRoute requiredRole="employee">
                 <CreateExpenseReportPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/expense-reports/:id" element={
+              <ProtectedRoute>
+                <ExpenseReportDetailPage />
               </ProtectedRoute>
             } />
             <Route path="/expense-reports/:id/edit" element={
