@@ -41,7 +41,9 @@ export const CreateExpenseReportPage: React.FC = () => {
         trip_end_date: data.trip_end_date,
       };
 
-      const report = await createReportMutation.mutateAsync(reportData);
+      const response = await createReportMutation.mutateAsync(reportData);
+      // APIレスポンスは { success: true, data: reportObject } の形式
+      const report = response.data || response;
 
       // Create expense items
       for (const item of items) {
@@ -58,10 +60,9 @@ export const CreateExpenseReportPage: React.FC = () => {
       // Submit for approval if requested
       if (action === 'submit') {
         await api.expenseReports.submit(report.id);
+        // Navigate back to expense reports list only when submitting
+        navigate('/expense-reports');
       }
-
-      // Navigate back to expense reports list
-      navigate('/expense-reports');
     } catch (error) {
       console.error('Failed to create expense report:', error);
       throw error; // Re-throw to let form handle the error
@@ -77,7 +78,36 @@ export const CreateExpenseReportPage: React.FC = () => {
       return; // Nothing to save
     }
     
-    await handleSubmit(data, items, 'save');
+    try {
+      // Create the expense report as draft
+      const reportData = {
+        title: data.title,
+        trip_purpose: data.trip_purpose,
+        trip_start_date: data.trip_start_date,
+        trip_end_date: data.trip_end_date,
+      };
+
+      const response = await createReportMutation.mutateAsync(reportData);
+      // APIレスポンスは { success: true, data: reportObject } の形式
+      const report = response.data || response;
+
+      // Create expense items
+      for (const item of items) {
+        await createItemMutation.mutateAsync({
+          expense_report_id: report.id,
+          category: item.category,
+          description: item.description,
+          amount: item.amount,
+          expense_date: item.expense_date,
+          receipt_url: item.receipt_url,
+        });
+      }
+      
+      // Do not navigate - stay on the same page for draft saves
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      throw error; // Re-throw to let form handle the error
+    }
   };
 
   const handleCancel = () => {

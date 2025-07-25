@@ -116,23 +116,23 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
     setIsFormDirty(true);
   };
 
-  // Auto-save functionality
-  const handleAutoSave = useCallback(async (data: ExpenseReportFormData) => {
-    if (onSaveDraft && !isEdit && (isDirty || expenseItems.length > 0)) {
-      try {
-        await onSaveDraft(data, expenseItems);
-      } catch (error) {
-        console.warn('Auto-save failed:', error);
-      }
-    }
-  }, [onSaveDraft, isEdit, isDirty, expenseItems]);
+  // Auto-save functionality disabled
+  // const handleAutoSave = useCallback(async (data: ExpenseReportFormData) => {
+  //   if (onSaveDraft && !isEdit && (isDirty || expenseItems.length > 0)) {
+  //     try {
+  //       await onSaveDraft(data, expenseItems);
+  //     } catch (error) {
+  //       console.warn('Auto-save failed:', error);
+  //     }
+  //   }
+  // }, [onSaveDraft, isEdit, isDirty, expenseItems]);
   
-  useAutoSave({
-    form,
-    onSave: handleAutoSave,
-    enabled: !isEdit && !!onSaveDraft,
-    delay: 30000, // 30 seconds
-  });
+  // useAutoSave({
+  //   form,
+  //   onSave: handleAutoSave,
+  //   enabled: !isEdit && !!onSaveDraft,
+  //   delay: 30000, // 30 seconds
+  // });
   
   const onSave = async (data: ExpenseReportFormData) => {
     setIsSaving(true);
@@ -154,6 +154,9 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
       clearStorage(); // Clear backup after successful submit
     } catch (error) {
       error('提出に失敗しました');
+      // Navigate to expense reports list even if submit fails
+      // This ensures the user can see existing reports and try again
+      onCancel();
     }
   };
   
@@ -301,13 +304,6 @@ export const ExpenseReportForm: React.FC<ExpenseReportFormProps> = ({
           </div>
         )}
         
-        {!isEdit && onSaveDraft && (
-          <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-xs text-blue-700">
-              💡 フォームの内容は30秒ごとに自動保存されます
-            </p>
-          </div>
-        )}
       </form>
       
       {/* Confirmation Dialog */}

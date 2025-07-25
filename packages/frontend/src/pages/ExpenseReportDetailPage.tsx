@@ -4,7 +4,7 @@ import { ExpenseReport, ExpenseItem, ApprovalHistory } from '@/types';
 import { Button } from '@/components/common/Button';
 import { ExpenseItemCard } from '@/components/features/expense-reports/ExpenseItemCard';
 import { api } from '@/services/api';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { EXPENSE_STATUSES } from '@/utils/constants';
 import { 
