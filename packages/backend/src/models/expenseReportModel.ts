@@ -5,10 +5,16 @@ export class ExpenseReportModel {
   static async findAll(userId?: string, role?: string): Promise<ExpenseReport[]> {
     let query = `
       SELECT er.*, u.name as user_name, u.email as user_email,
-             approver.name as approver_name
+             approver.name as approver_name,
+             COALESCE(item_totals.calculated_total, 0) as total_amount
       FROM expense_reports er
       JOIN users u ON er.user_id = u.id
       LEFT JOIN users approver ON er.approved_by = approver.id
+      LEFT JOIN (
+        SELECT expense_report_id, SUM(amount) as calculated_total
+        FROM expense_items
+        GROUP BY expense_report_id
+      ) item_totals ON er.id = item_totals.expense_report_id
     `;
     
     const values: any[] = [];
@@ -28,10 +34,16 @@ export class ExpenseReportModel {
   static async findById(id: string, userId?: string, role?: string): Promise<ExpenseReport | null> {
     let query = `
       SELECT er.*, u.name as user_name, u.email as user_email,
-             approver.name as approver_name
+             approver.name as approver_name,
+             COALESCE(item_totals.calculated_total, 0) as total_amount
       FROM expense_reports er
       JOIN users u ON er.user_id = u.id
       LEFT JOIN users approver ON er.approved_by = approver.id
+      LEFT JOIN (
+        SELECT expense_report_id, SUM(amount) as calculated_total
+        FROM expense_items
+        GROUP BY expense_report_id
+      ) item_totals ON er.id = item_totals.expense_report_id
       WHERE er.id = $1
     `;
     

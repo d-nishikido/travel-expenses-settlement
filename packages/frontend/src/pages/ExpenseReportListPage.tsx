@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ExpenseReport } from '@/types';
 import { Button } from '@/components/common/Button';
 import { ExpenseReportCard } from '@/components/features/expense-reports/ExpenseReportCard';
+import { Layout } from '@/components/layout/Layout';
 import { api } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { EXPENSE_STATUSES } from '@/utils/constants';
@@ -152,7 +153,8 @@ export const ExpenseReportListPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <Layout>
+      <div className="space-y-6">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -248,6 +250,7 @@ export const ExpenseReportListPage: React.FC = () => {
           {renderPagination()}
         </div>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 };

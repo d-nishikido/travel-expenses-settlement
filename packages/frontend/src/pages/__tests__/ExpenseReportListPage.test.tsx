@@ -13,7 +13,7 @@ jest.mock('@/services/api', () => ({
   },
 }));
 
-jest.mock('@/hooks/useAuth', () => ({
+jest.mock('@/contexts/AuthContext', () => ({
   useAuth: () => ({
     user: { id: 'user1', role: 'employee' },
   }),
@@ -27,6 +27,11 @@ jest.mock('@/utils/constants', () => ({
     { value: 'rejected', label: '却下', color: 'red' },
     { value: 'paid', label: '支払済', color: 'purple' },
   ],
+}));
+
+// Mock the Layout component
+jest.mock('@/components/layout/Layout', () => ({
+  Layout: ({ children }: { children: React.ReactNode }) => <div data-testid="layout">{children}</div>,
 }));
 
 // Mock the ExpenseReportCard component
@@ -93,6 +98,12 @@ describe('ExpenseReportListPage', () => {
 
     expect(screen.getByText('精算申請一覧')).toBeInTheDocument();
     expect(screen.getByTestId('create-new-button')).toBeInTheDocument();
+  });
+
+  it('renders with Layout component', async () => {
+    renderWithRouter(<ExpenseReportListPage />);
+
+    expect(screen.getByTestId('layout')).toBeInTheDocument();
   });
 
   it('displays loading state initially', () => {
