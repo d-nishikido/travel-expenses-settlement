@@ -45,7 +45,7 @@
 
 ```bash
 # 開発環境の起動
-docker-compose up -d
+docker compose up -d
 
 # 開発サーバーの起動（ローカル）
 pnpm run dev
@@ -148,16 +148,16 @@ travel-expenses-settlement/
 - [x] 基本的なフォルダ構造
 
 ### フェーズ2: 認証機能 🚧
-- [ ] ユーザー認証API
-- [ ] JWT実装
-- [ ] ログイン画面
-- [ ] 認証コンテキスト
+- [x] ユーザー認証API
+- [x] JWT実装
+- [x] ログイン画面
+- [x] 認証コンテキスト
 
 ### フェーズ3: 精算申請機能 🚧
-- [ ] 精算申請API
-- [ ] 精算申請画面
-- [ ] 申請一覧画面
-- [ ] 申請詳細画面
+- [x] 精算申請API
+- [x] 精算申請画面
+- [x] 申請一覧画面
+- [x] 申請詳細画面
 
 ### フェーズ4: 承認機能 🚧
 - [ ] 承認API
@@ -216,7 +216,7 @@ pnpm run validate:env
 ./scripts/build.sh --docker
 
 # 本番環境へのデプロイ（詳細はデプロイガイドを参照）
-docker-compose -f docker/docker-compose.prod.yml up -d
+docker compose -f docker/docker-compose.prod.yml up -d
 ```
 
 ### CI/CD パイプライン

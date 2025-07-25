@@ -4,7 +4,7 @@ import { ExpenseReport } from '@/types';
 import { Button } from '@/components/common/Button';
 import { ExpenseReportCard } from '@/components/features/expense-reports/ExpenseReportCard';
 import { api } from '@/services/api';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { EXPENSE_STATUSES } from '@/utils/constants';
 import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
@@ -38,10 +38,14 @@ export const ExpenseReportListPage: React.FC = () => {
       
       const response = await api.expenseReports.getAll(params);
       
+      console.log('API Response:', response);
+      
       if (response.success) {
-        setReports(response.data.reports || []);
+        // レスポンス構造を確認 - response.dataが配列の場合とオブジェクトの場合を処理
+        const reports = Array.isArray(response.data) ? response.data : (response.data.reports || []);
+        setReports(reports);
         setTotalPages(response.data.totalPages || 1);
-        setTotalReports(response.data.total || 0);
+        setTotalReports(response.data.total || reports.length);
       } else {
         throw new Error(response.message || '申請の取得に失敗しました');
       }

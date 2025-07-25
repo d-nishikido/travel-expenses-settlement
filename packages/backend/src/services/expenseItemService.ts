@@ -48,24 +48,36 @@ export class ExpenseItemService {
     userId: string,
     role: string
   ): Promise<ExpenseItem> {
+    logger.info('Creating expense item', { reportId, itemData, userId, role });
+    
     // Check if user can access the report
     const report = await ExpenseReportModel.findById(reportId, userId, role);
     if (!report) {
+      logger.error('Report not found', { reportId, userId });
       throw new AppError(404, 'REPORT_NOT_FOUND', 'Expense report not found');
     }
 
+    logger.info('Report found', { reportId, reportStatus: report.status });
+
     // Only allow modifications to draft reports
     if (report.status !== 'draft') {
+      logger.error('Invalid report status', { reportId, status: report.status });
       throw new AppError(400, 'INVALID_STATUS', 'Cannot add items to submitted reports');
     }
 
     // Validate amount
     if (itemData.amount <= 0) {
+      logger.error('Invalid amount', { amount: itemData.amount });
       throw new AppError(400, 'INVALID_AMOUNT', 'Amount must be greater than zero');
     }
 
     // Validate expense date is not in the future
-    if (new Date(itemData.expense_date) > new Date()) {
+    const expenseDate = new Date(itemData.expense_date);
+    const today = new Date();
+    logger.info('Date validation', { expenseDate, today, isInFuture: expenseDate > today });
+    
+    if (expenseDate > today) {
+      logger.error('Invalid date - in future', { expenseDate, today });
       throw new AppError(400, 'INVALID_DATE', 'Expense date cannot be in the future');
     }
 

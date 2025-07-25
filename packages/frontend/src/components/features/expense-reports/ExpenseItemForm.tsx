@@ -59,7 +59,7 @@ export const ExpenseItemForm: React.FC<ExpenseItemFormProps> = ({
       category: data.category as any,
       description: data.description,
       amount: data.amount,
-      expense_date: data.expense_date,
+      expense_date: new Date(data.expense_date),
       receipt_url: initialData?.receipt_url || null,
     });
   };
@@ -101,7 +101,7 @@ export const ExpenseItemForm: React.FC<ExpenseItemFormProps> = ({
           required
           error={errors.expense_date?.message}
           disabled={disabled}
-          {...register('expense_date')}
+          {...register('expense_date', { valueAsDate: true })}
         />
 
         <FormTextarea

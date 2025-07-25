@@ -17,8 +17,38 @@ jest.mock('@/utils/constants', () => ({
   ],
 }));
 
+// Mock hooks
+jest.mock('@/hooks/useToast', () => ({
+  useToast: () => ({
+    toasts: [],
+    success: jest.fn(),
+    error: jest.fn(),
+    hideToast: jest.fn(),
+  }),
+}));
+
+jest.mock('@/hooks/useFormStorage', () => ({
+  useFormStorage: () => ({
+    clearStorage: jest.fn(),
+  }),
+}));
+
+jest.mock('@/hooks/useAutoSave', () => ({
+  useAutoSave: jest.fn(),
+}));
+
+// Mock localStorage
+const localStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+
 const mockOnSubmit = jest.fn();
 const mockOnCancel = jest.fn();
+const mockOnSaveDraft = jest.fn();
 
 describe('ExpenseReportForm', () => {
   beforeEach(() => {
@@ -63,7 +93,7 @@ describe('ExpenseReportForm', () => {
     });
   });
 
-  it('calls onCancel when cancel button is clicked', async () => {
+  it('calls onCancel directly when no changes made', async () => {
     const user = userEvent.setup();
 
     render(
@@ -76,6 +106,34 @@ describe('ExpenseReportForm', () => {
     const cancelButton = screen.getByText('キャンセル');
     await user.click(cancelButton);
 
+    expect(mockOnCancel).toHaveBeenCalledTimes(1);
+  });
+  
+  it('shows confirmation dialog when canceling with unsaved changes', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ExpenseReportForm
+        onSubmit={mockOnSubmit}
+        onCancel={mockOnCancel}
+      />
+    );
+
+    // Make some changes to trigger dirty state
+    await user.type(screen.getByLabelText(/申請タイトル/), 'テスト');
+    
+    const cancelButton = screen.getByText('キャンセル');
+    await user.click(cancelButton);
+
+    // Should show confirmation dialog
+    await waitFor(() => {
+      expect(screen.getByText('変更を破棄しますか？')).toBeInTheDocument();
+    });
+    
+    // Click confirm to proceed with cancel
+    const confirmButton = screen.getByText('破棄する');
+    await user.click(confirmButton);
+    
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 
@@ -133,5 +191,59 @@ describe('ExpenseReportForm', () => {
     expect(screen.getByDisplayValue('テスト目的')).toBeInTheDocument();
     expect(screen.getByDisplayValue('2024-01-01')).toBeInTheDocument();
     expect(screen.getByDisplayValue('2024-01-02')).toBeInTheDocument();
+  });
+  
+  it('shows auto-save notification when onSaveDraft is provided', () => {
+    render(
+      <ExpenseReportForm
+        onSubmit={mockOnSubmit}
+        onCancel={mockOnCancel}
+        onSaveDraft={mockOnSaveDraft}
+      />
+    );
+
+    expect(screen.getByText(/フォームの内容は30秒ごとに自動保存されます/)).toBeInTheDocument();
+  });
+  
+  it('shows unsaved changes indicator when form is dirty', async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <ExpenseReportForm
+        onSubmit={mockOnSubmit}
+        onCancel={mockOnCancel}
+      />
+    );
+
+    // Make changes to trigger dirty state
+    await user.type(screen.getByLabelText(/申請タイトル/), 'テスト');
+    
+    await waitFor(() => {
+      expect(screen.getByText('*未保存の変更があります')).toBeInTheDocument();
+    });
+  });
+  
+  it('shows saving state when draft save is in progress', async () => {
+    const user = userEvent.setup();
+    const slowOnSubmit = jest.fn(() => new Promise(resolve => setTimeout(resolve, 100)));
+    
+    render(
+      <ExpenseReportForm
+        onSubmit={slowOnSubmit}
+        onCancel={mockOnCancel}
+      />
+    );
+
+    // Fill required fields
+    await user.type(screen.getByLabelText(/申請タイトル/), 'テスト出張');
+    await user.type(screen.getByLabelText(/出張目的/), 'テスト目的');
+    await user.type(screen.getByLabelText(/出張開始日/), '2024-01-01');
+    await user.type(screen.getByLabelText(/出張終了日/), '2024-01-02');
+
+    const saveButton = screen.getByText('下書き保存');
+    await user.click(saveButton);
+
+    // Should show saving state
+    expect(screen.getByText('保存中...')).toBeInTheDocument();
   });
 });
